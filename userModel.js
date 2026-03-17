@@ -2,27 +2,16 @@ const db = require('../config/db');
 
 const User = {
 
-  createUser: async (data) => {
-    const {
-      full_name,
-      email,
-      phone,
-      password,
-      role,
-      house_number,
-      lease_start,
-      lease_end,
-      shift,
-      assigned_gate,
-      admin_level
-    } = data;
+  // ===============================
+  // 🔹 CREATE ADMIN
+  // ===============================
+  createAdmin: async (data) => {
+    const { full_name, email, phone, password, admin_level } = data;
 
     const query = `
       INSERT INTO users 
-      (full_name, email, phone, password, role,
-       house_number, lease_start, lease_end,
-       shift, assigned_gate, admin_level)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (full_name, email, phone, password, role, admin_level)
+      VALUES (?, ?, ?, ?, 'ADMIN', ?)
     `;
 
     const [result] = await db.execute(query, [
@@ -30,18 +19,81 @@ const User = {
       email,
       phone,
       password,
-      role,
-      house_number || null,
-      lease_start || null,
-      lease_end || null,
-      shift || null,
-      assigned_gate || null,
       admin_level || 1
     ]);
 
     return result;
   },
 
+  // ===============================
+  // 🔹 CREATE TENANT
+  // ===============================
+  createTenant: async (data) => {
+    const {
+      full_name,
+      email,
+      phone,
+      password,
+      house_number,
+      lease_start,
+      lease_end
+    } = data;
+
+    const query = `
+      INSERT INTO users 
+      (full_name, email, phone, password, role,
+       house_number, lease_start, lease_end)
+      VALUES (?, ?, ?, ?, 'TENANT', ?, ?, ?)
+    `;
+
+    const [result] = await db.execute(query, [
+      full_name,
+      email,
+      phone,
+      password,
+      house_number,
+      lease_start,
+      lease_end
+    ]);
+
+    return result;
+  },
+
+  // ===============================
+  // 🔹 CREATE GUARD
+  // ===============================
+  createGuard: async (data) => {
+    const {
+      full_name,
+      email,
+      phone,
+      password,
+      shift,
+      assigned_gate
+    } = data;
+
+    const query = `
+      INSERT INTO users 
+      (full_name, email, phone, password, role,
+       shift, assigned_gate)
+      VALUES (?, ?, ?, ?, 'GUARD', ?, ?)
+    `;
+
+    const [result] = await db.execute(query, [
+      full_name,
+      email,
+      phone,
+      password,
+      shift,
+      assigned_gate
+    ]);
+
+    return result;
+  },
+
+  // ===============================
+  // 🔹 COMMON METHODS
+  // ===============================
   findByEmail: async (email) => {
     const [rows] = await db.execute(
       "SELECT * FROM users WHERE email = ?", [email]
@@ -60,6 +112,7 @@ const User = {
     );
     return rows[0];
   }
+
 };
 
 module.exports = User;
