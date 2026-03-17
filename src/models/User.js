@@ -57,7 +57,17 @@ const User = sequelize.define('User', {
     },
     department: DataTypes.STRING(50),
     hire_date: DataTypes.DATE,
-    last_login: DataTypes.DATE
+    last_login: DataTypes.DATE,
+    
+    // Add these fields for password reset functionality
+    reset_token: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    reset_token_expiry: {
+        type: DataTypes.DATE,
+        allowNull: true
+    }
 }, {
     tableName: 'users',
     timestamps: true,
