@@ -1,0 +1,26 @@
+CREATE DATABASE property_management;
+
+USE property_management;
+
+CREATE TABLE users (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'TENANT', 'GUARD')),
+
+    -- Tenant specific
+    house_number VARCHAR(20),
+    lease_start DATE,
+    lease_end DATE,
+
+    -- Guard specific
+    shift VARCHAR(50),
+    assigned_gate VARCHAR(50),
+
+    -- Admin specific
+    admin_level INT DEFAULT 1,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
