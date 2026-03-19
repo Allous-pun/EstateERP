@@ -1,5 +1,5 @@
 // src/controllers/authController.js
-const { User, Role } = require('../models');  // Changed this line
+const { User, Role } = require('../models');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 
@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
         // Create user
         const user = await User.create({
             email,
-            password_hash: password,
+            password_hash: password, // Make sure you hash the password before saving
             first_name,
             last_name,
             phone,
@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
             first_name: user.first_name,
             last_name: user.last_name,
             role: role.name,
-            token: generateToken(user.id)
+            token: generateToken(user.id) // Use the newly created user's ID
         });
 
     } catch (error) {

@@ -17,7 +17,7 @@ CREATE TABLE roles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 2. USERS TABLE (with role-based fields)
+-- 2. USERS TABLE (with role-based fields and password reset)
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     -- Core fields
@@ -52,13 +52,18 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
+    -- 🔐 PASSWORD RESET FIELDS (ADDED)
+    reset_token VARCHAR(255) NULL,
+    reset_token_expiry TIMESTAMP NULL,
+    
     -- Foreign key
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT,
     
     -- Indexes for performance
     INDEX idx_email (email),
     INDEX idx_role (role_id),
-    INDEX idx_is_active (is_active)
+    INDEX idx_is_active (is_active),
+    INDEX idx_reset_token (reset_token)  -- Index for password reset lookups
 );
 
 -- 3. SESSIONS TABLE (for refresh tokens)
@@ -110,3 +115,6 @@ INSERT INTO users (
     TRUE,
     'EMP001'
 );
+
+
+check pia hii uone swali yako vizuri

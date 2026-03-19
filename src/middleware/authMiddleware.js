@@ -1,7 +1,8 @@
 // src/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
+const { User } = require('../models'); // Add this import
 
-exports.verifyToken = (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
   // Handle "Bearer token" format
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -12,12 +13,20 @@ exports.verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    
+    // Fetch the user from database to get role_id
+    const user = await User.findByPk(decoded.id, {
+      attributes: ['id', 'email', 'first_name', 'last_name', 'role_id'] // Include role_id
+    });
+
+    if (!user) {
+      return res.status(401).json({ msg: "User not found" });
+    }
+
+    // Attach full user data to req.user
+    req.user = user;
     next();
   } catch (err) {
     return res.status(403).json({ msg: "Invalid or expired token" });
   }
 };
-
-// Remove the isAdmin function from here - it's in roleMiddleware.js
-// exports.isAdmin = (req, res, next) => { ... }  // DELETE THIS
