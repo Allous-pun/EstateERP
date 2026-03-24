@@ -1,4 +1,3 @@
-// src/middleware/roleMiddleware.js
 const Role = require('../models/Role');
 
 // Generic role checker
@@ -42,7 +41,14 @@ const hasRole = (roleNames) => {
     };
 };
 
+// Generic checkRole function (alias for hasRole)
+const checkRole = (roleNames) => {
+    return hasRole(roleNames);
+};
+
 // Specific role middleware
+exports.checkRole = checkRole;
+exports.hasRole = hasRole;
 exports.isAdmin = hasRole(['super_admin', 'admin']);
 exports.isFinanceOfficer = hasRole(['finance_officer', 'super_admin', 'admin']);
 exports.isFacilityManager = hasRole(['facility_manager', 'super_admin', 'admin']);

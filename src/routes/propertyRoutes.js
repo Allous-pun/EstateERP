@@ -3,6 +3,7 @@ const router = express.Router();
 const propertyController = require('../controllers/propertyController');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { checkRole } = require('../middleware/roleMiddleware');
+const { validateProperty, handleValidationErrors } = require('../middleware/validationMiddleware');
 
 // All routes require authentication
 router.use(verifyToken);
@@ -17,12 +18,16 @@ router.get('/:id/stats', propertyController.getPropertyStats);
 router.post(
     '/',
     checkRole(['super_admin', 'admin']),
+    validateProperty,
+    handleValidationErrors,
     propertyController.createProperty
 );
 
 router.put(
     '/:id',
     checkRole(['super_admin', 'admin']),
+    validateProperty,
+    handleValidationErrors,
     propertyController.updateProperty
 );
 

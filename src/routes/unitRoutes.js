@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const unitController = require('../controllers/unitController');
 const { verifyToken } = require('../middleware/authMiddleware');
+const { checkRole } = require('../middleware/roleMiddleware');
 const { validateUnit, handleValidationErrors } = require('../middleware/validationMiddleware');
 
 // All routes require authentication
@@ -15,6 +16,7 @@ router.get('/property/:propertyId', unitController.getUnitsByProperty);
 // Admin/Facility Manager only routes
 router.post(
     '/',
+    checkRole(['super_admin', 'admin', 'facility_manager']),
     validateUnit,
     handleValidationErrors,
     unitController.createUnit
@@ -22,11 +24,16 @@ router.post(
 
 router.put(
     '/:id',
+    checkRole(['super_admin', 'admin', 'facility_manager']),
     validateUnit,
     handleValidationErrors,
     unitController.updateUnit
 );
 
-router.delete('/:id', unitController.deleteUnit);
+router.delete(
+    '/:id', 
+    checkRole(['super_admin', 'admin']),
+    unitController.deleteUnit
+);
 
 module.exports = router;
