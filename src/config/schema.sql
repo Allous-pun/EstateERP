@@ -52,6 +52,10 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
+  -- 🔐 PASSWORD RESET FIELDS (ADDED)
+    reset_token VARCHAR(255) NULL,
+    reset_token_expiry TIMESTAMP NULL,
+
     -- Foreign key
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT,
     
@@ -109,4 +113,45 @@ INSERT INTO users (
     (SELECT id FROM roles WHERE name = 'super_admin'),
     TRUE,
     'EMP001'
+);
+
+-- properties table
+CREATE TABLE IF NOT EXISTS properties (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    description TEXT,
+    total_units INT DEFAULT 0,
+    building_type ENUM('apartment', 'commercial', 'residential', 'mixed') DEFAULT 'apartment',
+    amenities JSON,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_name (name),
+    INDEX idx_location (location)
+);
+
+-- Units table
+CREATE TABLE IF NOT EXISTS units (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    unit_number VARCHAR(50) NOT NULL,
+    building VARCHAR(100) NOT NULL,
+    floor INT,
+    bedroom_count INT DEFAULT 1,
+    bathroom_count INT DEFAULT 1,
+    size_sqm DECIMAL(10, 2),
+    rent_price DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    status ENUM('vacant', 'occupied', 'maintenance', 'reserved') DEFAULT 'vacant',
+    property_id INT NOT NULL,
+    current_tenant_id INT,
+    description TEXT,
+    features JSON,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (current_tenant_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_property_id (property_id),
+    INDEX idx_unit_number (unit_number),
+    INDEX idx_status (status)
 );
