@@ -63,7 +63,7 @@ CREATE TABLE users (
     INDEX idx_email (email),
     INDEX idx_role (role_id),
     INDEX idx_is_active (is_active),
-    INDEX idx_reset_token (reset_token)  -- Index for password reset lookups
+    INDEX idx_reset_token (reset_token)
 );
 
 -- 3. SESSIONS TABLE (for refresh tokens)
