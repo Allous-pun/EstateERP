@@ -1,12 +1,29 @@
-// src/models/index.js to handle model associations and exports
 const User = require('./User');
 const Role = require('./Role');
+const Property = require('./Property');
+const Unit = require('./Unit');
 
 // Define associations
+
+// User - Role associations
 User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
 Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
 
+// Property - Unit associations
+Property.hasMany(Unit, { foreignKey: 'property_id', as: 'units' });
+Unit.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
+
+// Unit - User (Tenant) associations
+Unit.belongsTo(User, { foreignKey: 'current_tenant_id', as: 'tenant' });
+User.hasMany(Unit, { foreignKey: 'current_tenant_id', as: 'rented_units' });
+
+// Property - User (Creator) association
+Property.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+User.hasMany(Property, { foreignKey: 'created_by', as: 'properties' });
+
 module.exports = {
     User,
-    Role
+    Role,
+    Property,
+    Unit
 };
