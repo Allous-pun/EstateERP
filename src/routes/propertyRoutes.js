@@ -17,7 +17,7 @@ router.get('/:id/stats', propertyController.getPropertyStats);
 // Admin/Facility Manager only routes
 router.post(
     '/',
-    checkRole(['super_admin', 'admin']),
+    checkRole(['super_admin', 'admin', 'facility_manager']),  // Added facility_manager
     validateProperty,
     handleValidationErrors,
     propertyController.createProperty
@@ -25,7 +25,7 @@ router.post(
 
 router.put(
     '/:id',
-    checkRole(['super_admin', 'admin']),
+    checkRole(['super_admin', 'admin', 'facility_manager']),  // Added facility_manager
     validateProperty,
     handleValidationErrors,
     propertyController.updateProperty
@@ -33,7 +33,7 @@ router.put(
 
 router.delete(
     '/:id',
-    checkRole(['super_admin']),
+    checkRole(['super_admin', 'admin']),  // Keep delete restricted to admin only
     propertyController.deleteProperty
 );
 

@@ -1,4 +1,5 @@
-const { Property, Unit } = require('../models');
+const { Op } = require('sequelize');
+const { Property, Unit, User } = require('../models');
 
 // @desc    Get all properties
 // @route   GET /api/properties
@@ -124,7 +125,7 @@ exports.getPropertyById = async (req, res) => {
 // @access  Private/Admin or Super Admin
 exports.createProperty = async (req, res) => {
     try {
-        const { name, location, description } = req.body;
+        const { name, location, description, building_type, amenities } = req.body;
         
         // Check if property with same name already exists
         const existingProperty = await Property.findOne({
@@ -142,6 +143,8 @@ exports.createProperty = async (req, res) => {
             name,
             location,
             description,
+            building_type: building_type || 'apartment',
+            amenities: amenities || [],
             created_by: req.user.id // Assuming req.user contains the authenticated user
         });
         
@@ -183,7 +186,7 @@ exports.updateProperty = async (req, res) => {
             });
         }
         
-        const { name, location, description } = req.body;
+        const { name, location, description, building_type, amenities, is_active } = req.body;
         
         // Check if updating name would cause duplicate
         if (name && name !== property.name) {
@@ -202,7 +205,10 @@ exports.updateProperty = async (req, res) => {
         await property.update({
             name: name || property.name,
             location: location || property.location,
-            description: description !== undefined ? description : property.description
+            description: description !== undefined ? description : property.description,
+            building_type: building_type || property.building_type,
+            amenities: amenities || property.amenities,
+            is_active: is_active !== undefined ? is_active : property.is_active
         });
         
         res.json({
@@ -351,12 +357,26 @@ exports.getPropertyStats = async (req, res) => {
 // @access  Private
 exports.filterProperties = async (req, res) => {
     try {
-        const { min_units, max_units, location, has_vacant_units } = req.query;
+        const { search, location, min_units, max_units, has_vacant_units, building_type } = req.query;
         
         let where = {};
         
+        // Add search filter
+        if (search) {
+            where[Op.or] = [
+                { name: { [Op.like]: `%${search}%` } },
+                { location: { [Op.like]: `%${search}%` } }
+            ];
+        }
+        
+        // Add location filter
         if (location) {
             where.location = { [Op.like]: `%${location}%` };
+        }
+        
+        // Add building type filter
+        if (building_type) {
+            where.building_type = building_type;
         }
         
         const properties = await Property.findAll({
@@ -373,6 +393,7 @@ exports.filterProperties = async (req, res) => {
         // Apply filters after fetching (for aggregate conditions)
         let filteredProperties = properties;
         
+        // Filter by total units range
         if (min_units || max_units) {
             filteredProperties = filteredProperties.filter(prop => {
                 const unitCount = prop.units?.length || 0;
@@ -382,16 +403,27 @@ exports.filterProperties = async (req, res) => {
             });
         }
         
+        // Filter by vacant units availability
         if (has_vacant_units === 'true') {
             filteredProperties = filteredProperties.filter(prop => {
                 return prop.units?.some(unit => unit.status === 'vacant');
             });
         }
         
+        // Add statistics to each property
+        const propertiesWithStats = filteredProperties.map(property => {
+            const plainProperty = property.get({ plain: true });
+            const units = plainProperty.units || [];
+            plainProperty.total_units = units.length;
+            plainProperty.vacant_units = units.filter(u => u.status === 'vacant').length;
+            plainProperty.occupied_units = units.filter(u => u.status === 'occupied').length;
+            return plainProperty;
+        });
+        
         res.json({
             success: true,
-            count: filteredProperties.length,
-            data: filteredProperties
+            count: propertiesWithStats.length,
+            data: propertiesWithStats
         });
     } catch (error) {
         console.error('Filter properties error:', error);
