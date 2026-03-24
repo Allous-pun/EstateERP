@@ -1,4 +1,3 @@
-// src/models/index.js
 const User = require('./User');
 const Role = require('./Role');
 const Property = require('./Property');
@@ -17,6 +16,10 @@ Unit.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
 // Unit - User (Tenant) associations
 Unit.belongsTo(User, { foreignKey: 'current_tenant_id', as: 'tenant' });
 User.hasMany(Unit, { foreignKey: 'current_tenant_id', as: 'rented_units' });
+
+// Property - User (Creator) association
+Property.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+User.hasMany(Property, { foreignKey: 'created_by', as: 'properties' });
 
 module.exports = {
     User,
