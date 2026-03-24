@@ -115,6 +115,3 @@ INSERT INTO users (
     TRUE,
     'EMP001'
 );
-
-
-check pia hii uone swali yako vizuri
