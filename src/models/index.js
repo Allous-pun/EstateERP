@@ -8,6 +8,7 @@ const Tenancy = require('./Tenancy');
 const Invoice = require('./Invoice');
 const Payment = require('./Payment');
 const InvoiceSettings = require('./InvoiceSettings');
+const VisitorLog = require('./VisitorLog');
 
 // User - Role associations
 User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
@@ -53,6 +54,15 @@ Tenancy.hasMany(Invoice, { foreignKey: 'tenancy_id', as: 'invoices' });
 InvoiceSettings.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
 InvoiceSettings.belongsTo(User, { foreignKey: 'tenant_id', as: 'tenant' });
 
+// =============================================
+// Phase 6: Visitor Log Associations
+// =============================================
+// Add associations
+VisitorLog.belongsTo(Property, { foreignKey: 'visited_property_id', as: 'property' });
+VisitorLog.belongsTo(User, { foreignKey: 'logged_by', as: 'guard' });
+Property.hasMany(VisitorLog, { foreignKey: 'visited_property_id', as: 'visitor_logs' });
+User.hasMany(VisitorLog, { foreignKey: 'logged_by', as: 'visitor_logs' });
+
 module.exports = {
     sequelize,
     User,
@@ -62,5 +72,6 @@ module.exports = {
     Tenancy,
     Invoice,
     Payment,
-    InvoiceSettings
+    InvoiceSettings,
+    VisitorLog
 };
