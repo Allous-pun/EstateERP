@@ -8,7 +8,6 @@ const unitRoutes = require('./routes/unitRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const tenancyRoutes = require('./routes/tenancyRoutes');
 const financialReportRoutes = require('./routes/financialReportRoutes');
-
 const visitorRoutes = require('./routes/visitorRoutes');
 
 const app = express();
