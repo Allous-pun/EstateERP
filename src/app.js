@@ -5,6 +5,8 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 const unitRoutes = require('./routes/unitRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
+const tenancyRoutes = require('./routes/tenancyRoutes');
 
 const app = express();
 
@@ -15,5 +17,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/units', unitRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/tenancies', tenancyRoutes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ success: true, message: 'API is healthy' });
+});
 
 module.exports = app;
