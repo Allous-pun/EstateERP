@@ -7,6 +7,7 @@ const propertyRoutes = require('./routes/propertyRoutes');
 const unitRoutes = require('./routes/unitRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const tenancyRoutes = require('./routes/tenancyRoutes');
+const financialReportRoutes = require('./routes/financialReportRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/tenancies', tenancyRoutes);
+app.use('/api/financial-reports', financialReportRoutes);   
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
