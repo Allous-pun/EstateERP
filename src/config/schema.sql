@@ -349,6 +349,101 @@ CREATE TABLE IF NOT EXISTS visitor_logs (
     INDEX idx_logged_by (logged_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Maintenance Tickets Table
+CREATE TABLE IF NOT EXISTS maintenance_tickets (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    ticket_number VARCHAR(50) NOT NULL UNIQUE,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    priority ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium',
+    status ENUM('pending', 'assigned', 'in_progress', 'completed', 'cancelled') DEFAULT 'pending',
+    category ENUM('plumbing', 'electrical', 'hvac', 'structural', 'appliance', 'furniture', 'cleaning', 'other') DEFAULT 'other',
+    reported_by INT NOT NULL,
+    unit_id INT NOT NULL,
+    property_id INT NOT NULL,
+    assigned_to INT,
+    scheduled_date DATETIME,
+    completed_date DATETIME,
+    estimated_cost DECIMAL(12, 2) DEFAULT 0,
+    actual_cost DECIMAL(12, 2) DEFAULT 0,
+    materials_used JSON,
+    notes TEXT,
+    resolution_notes TEXT,
+    before_photos JSON,
+    after_photos JSON,
+    is_billed BOOLEAN DEFAULT FALSE,
+    invoice_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (reported_by) REFERENCES users(id),
+    FOREIGN KEY (unit_id) REFERENCES units(id),
+    FOREIGN KEY (property_id) REFERENCES properties(id),
+    FOREIGN KEY (assigned_to) REFERENCES users(id),
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+    
+    INDEX idx_ticket_number (ticket_number),
+    INDEX idx_status (status),
+    INDEX idx_priority (priority),
+    INDEX idx_reported_by (reported_by),
+    INDEX idx_unit_id (unit_id),
+    INDEX idx_assigned_to (assigned_to)
+);
+
+-- Inventory Table
+CREATE TABLE IF NOT EXISTS inventory (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    item_code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    category ENUM('tools', 'materials', 'equipment', 'spare_parts', 'consumables', 'cleaning', 'safety') NOT NULL,
+    description TEXT,
+    unit ENUM('piece', 'meter', 'kilogram', 'liter', 'box', 'set', 'roll', 'pack') DEFAULT 'piece',
+    current_stock DECIMAL(12, 2) DEFAULT 0,
+    minimum_stock DECIMAL(12, 2) DEFAULT 0,
+    reorder_level DECIMAL(12, 2) DEFAULT 0,
+    unit_cost DECIMAL(12, 2) DEFAULT 0,
+    selling_price DECIMAL(12, 2) DEFAULT 0,
+    supplier VARCHAR(200),
+    supplier_contact VARCHAR(50),
+    location VARCHAR(100),
+    expiry_date DATE,
+    last_restocked DATETIME,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_item_code (item_code),
+    INDEX idx_name (name),
+    INDEX idx_category (category)
+);
+
+-- Stock Logs Table
+CREATE TABLE IF NOT EXISTS stock_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    inventory_id INT NOT NULL,
+    ticket_id INT,
+    transaction_type ENUM('restock', 'usage', 'adjustment', 'return', 'damaged') NOT NULL,
+    quantity DECIMAL(12, 2) NOT NULL,
+    quantity_before DECIMAL(12, 2) NOT NULL,
+    quantity_after DECIMAL(12, 2) NOT NULL,
+    unit_cost DECIMAL(12, 2) NOT NULL,
+    reference_number VARCHAR(100),
+    reason TEXT,
+    performed_by INT NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (inventory_id) REFERENCES inventory(id),
+    FOREIGN KEY (ticket_id) REFERENCES maintenance_tickets(id),
+    FOREIGN KEY (performed_by) REFERENCES users(id),
+    
+    INDEX idx_inventory_id (inventory_id),
+    INDEX idx_ticket_id (ticket_id),
+    INDEX idx_transaction_type (transaction_type),
+    INDEX idx_created_at (created_at)
+);
+
 -- ============================================
 -- Insert default roles
 -- ============================================

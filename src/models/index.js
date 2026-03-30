@@ -12,6 +12,11 @@ const VisitorLog = require('./VisitorLog');
 const Blacklist = require('./blacklist');
 const Visitor = require('./Visitor');
 
+// Phase 5: Maintenance Module Models
+const MaintenanceTicket = require('./MaintenanceTicket');
+const Inventory = require('./Inventory');
+const StockLog = require('./StockLog');
+
 // ============================================
 // User - Role Associations
 // ============================================
@@ -84,6 +89,33 @@ Blacklist.belongsTo(User, { foreignKey: 'added_by', as: 'addedBy' });
 Visitor.hasOne(Blacklist, { foreignKey: 'visitor_id', as: 'blacklist_entry' });
 User.hasMany(Blacklist, { foreignKey: 'added_by', as: 'blacklist_entries' });
 
+// ============================================
+// Phase 5: Maintenance Module Associations
+// ============================================
+
+// Maintenance Ticket associations
+MaintenanceTicket.belongsTo(User, { foreignKey: 'reported_by', as: 'reporter' });
+MaintenanceTicket.belongsTo(User, { foreignKey: 'assigned_to', as: 'technician' });
+MaintenanceTicket.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
+MaintenanceTicket.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
+MaintenanceTicket.belongsTo(Invoice, { foreignKey: 'invoice_id', as: 'invoice' });
+
+User.hasMany(MaintenanceTicket, { foreignKey: 'reported_by', as: 'reported_tickets' });
+User.hasMany(MaintenanceTicket, { foreignKey: 'assigned_to', as: 'assigned_tickets' });
+Unit.hasMany(MaintenanceTicket, { foreignKey: 'unit_id', as: 'tickets' });
+Property.hasMany(MaintenanceTicket, { foreignKey: 'property_id', as: 'tickets' });
+Invoice.hasMany(MaintenanceTicket, { foreignKey: 'invoice_id', as: 'tickets' });
+
+// Inventory associations
+Inventory.hasMany(StockLog, { foreignKey: 'inventory_id', as: 'stock_logs' });
+StockLog.belongsTo(Inventory, { foreignKey: 'inventory_id', as: 'inventory' });
+
+// Stock Log associations
+StockLog.belongsTo(User, { foreignKey: 'performed_by', as: 'user' });
+StockLog.belongsTo(MaintenanceTicket, { foreignKey: 'ticket_id', as: 'ticket' });
+MaintenanceTicket.hasMany(StockLog, { foreignKey: 'ticket_id', as: 'stock_logs' });
+User.hasMany(StockLog, { foreignKey: 'performed_by', as: 'stock_logs' });
+
 module.exports = {
     sequelize,
     User,
@@ -96,5 +128,9 @@ module.exports = {
     InvoiceSettings,
     VisitorLog,
     Visitor,
-    Blacklist
+    Blacklist,
+    // Phase 5: Maintenance Module Exports
+    MaintenanceTicket,
+    Inventory,
+    StockLog
 };

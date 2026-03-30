@@ -11,6 +11,10 @@ const financialReportRoutes = require('./routes/financialReportRoutes');
 const visitorRoutes = require('./routes/visitorRoutes');
 const blacklistRoutes = require('./routes/blacklistRoutes');
 
+// Phase 5: Maintenance Module Routes
+const maintenanceRoutes = require('./routes/maintenanceRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+
 const app = express();
 
 app.use(cors());
@@ -25,6 +29,10 @@ app.use('/api/tenancies', tenancyRoutes);
 app.use('/api/financial-reports', financialReportRoutes);   
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/blacklist', blacklistRoutes);
+
+// Phase 5: Maintenance Module Routes
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
