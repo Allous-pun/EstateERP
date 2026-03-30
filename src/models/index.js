@@ -8,20 +8,12 @@ const Tenancy = require('./Tenancy');
 const Invoice = require('./Invoice');
 const Payment = require('./Payment');
 const InvoiceSettings = require('./InvoiceSettings');
-<<<<<<< HEAD
-
-// User - Role associations
-User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
-Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
-
-// Property - Unit associations
-=======
 const VisitorLog = require('./VisitorLog');
 const Blacklist = require('./blacklist');
 const Visitor = require('./Visitor');
 
 // ============================================
-// User - Role Associations (CRITICAL FOR LOGIN)
+// User - Role Associations
 // ============================================
 User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
 Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
@@ -29,7 +21,6 @@ Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
 // ============================================
 // Property - Unit Associations
 // ============================================
->>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 Property.hasMany(Unit, { foreignKey: 'property_id', as: 'units' });
 Unit.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
 
@@ -69,8 +60,6 @@ Tenancy.hasMany(Invoice, { foreignKey: 'tenancy_id', as: 'invoices' });
 InvoiceSettings.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
 InvoiceSettings.belongsTo(User, { foreignKey: 'tenant_id', as: 'tenant' });
 
-<<<<<<< HEAD
-=======
 // ============================================
 // Phase 6: Visitor Log Associations
 // ============================================
@@ -80,7 +69,7 @@ Property.hasMany(VisitorLog, { foreignKey: 'visited_property_id', as: 'visitor_l
 User.hasMany(VisitorLog, { foreignKey: 'logged_by', as: 'visitor_logs' });
 
 // ============================================
-// QR Visitor System Associations (Paul's)
+// QR Visitor System Associations
 // ============================================
 Visitor.belongsTo(Property, { foreignKey: 'property_id', as: 'property' });
 Visitor.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
@@ -95,7 +84,6 @@ Blacklist.belongsTo(User, { foreignKey: 'added_by', as: 'addedBy' });
 Visitor.hasOne(Blacklist, { foreignKey: 'visitor_id', as: 'blacklist_entry' });
 User.hasMany(Blacklist, { foreignKey: 'added_by', as: 'blacklist_entries' });
 
->>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 module.exports = {
     sequelize,
     User,
@@ -105,12 +93,8 @@ module.exports = {
     Tenancy,
     Invoice,
     Payment,
-<<<<<<< HEAD
-    InvoiceSettings
-=======
     InvoiceSettings,
     VisitorLog,
     Visitor,
     Blacklist
->>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 };

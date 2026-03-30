@@ -258,8 +258,6 @@ CREATE TABLE IF NOT EXISTS invoice_settings (
     INDEX idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-<<<<<<< HEAD
-=======
 
 -- ============================================
 -- Phase 6: Visitor Management (Visitor Logs)
@@ -351,7 +349,6 @@ CREATE TABLE IF NOT EXISTS visitor_logs (
     INDEX idx_logged_by (logged_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
->>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 -- ============================================
 -- Insert default roles
 -- ============================================
