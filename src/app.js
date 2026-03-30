@@ -7,6 +7,12 @@ const propertyRoutes = require('./routes/propertyRoutes');
 const unitRoutes = require('./routes/unitRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const tenancyRoutes = require('./routes/tenancyRoutes');
+<<<<<<< HEAD
+=======
+const financialReportRoutes = require('./routes/financialReportRoutes');
+const visitorRoutes = require('./routes/visitorRoutes');
+const blacklistRoutes = require('./routes/blacklistRoutes');
+>>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 
 const app = express();
 
@@ -19,6 +25,12 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/tenancies', tenancyRoutes);
+<<<<<<< HEAD
+=======
+app.use('/api/financial-reports', financialReportRoutes);   
+app.use('/api/visitors', visitorRoutes);
+app.use('/api/blacklist', blacklistRoutes);
+>>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

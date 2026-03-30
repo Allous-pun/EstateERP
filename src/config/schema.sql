@@ -258,6 +258,100 @@ CREATE TABLE IF NOT EXISTS invoice_settings (
     INDEX idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+<<<<<<< HEAD
+=======
+
+-- ============================================
+-- Phase 6: Visitor Management (Visitor Logs)
+-- ============================================
+CREATE TABLE IF NOT EXISTS visitors (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    id_number VARCHAR(50),
+    purpose TEXT,
+    property_id INT,
+    unit_id INT,
+    
+    qr_token VARCHAR(255) UNIQUE NOT NULL,
+    qr_expires_at DATETIME NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    is_blacklisted BOOLEAN DEFAULT FALSE,
+    
+    check_in_time DATETIME,
+    check_out_time DATETIME,
+    
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    
+    INDEX idx_qr_token (qr_token),
+    INDEX idx_property (property_id),
+    INDEX idx_unit (unit_id),
+    INDEX idx_phone (phone),
+    INDEX idx_id_number (id_number),
+    INDEX idx_is_blacklisted (is_blacklisted)
+);
+
+CREATE TABLE IF NOT EXISTS blacklist (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    visitor_id INT NULL,
+    phone VARCHAR(20),
+    id_number VARCHAR(50),
+    reason TEXT NOT NULL,
+    added_by INT NOT NULL,
+    expires_at DATETIME NULL,
+    is_permanent BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    removed_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (visitor_id) REFERENCES visitors(id) ON DELETE CASCADE,
+    FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE CASCADE,
+    
+    INDEX idx_phone (phone),
+    INDEX idx_id_number (id_number),
+    INDEX idx_is_active (is_active),
+    INDEX idx_expires_at (expires_at),
+    INDEX idx_visitor_id (visitor_id)
+);
+
+-- Visitor Logs table
+
+CREATE TABLE IF NOT EXISTS visitor_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    visitor_name VARCHAR(100) NOT NULL,
+    visitor_phone VARCHAR(20) NOT NULL,
+    visitor_id_number VARCHAR(50),
+    purpose ENUM('delivery', 'meeting', 'inspection', 'maintenance', 'rental_viewing', 'guest', 'other') NOT NULL,
+    purpose_description TEXT,
+    visited_tenant_name VARCHAR(100),
+    visited_unit_number VARCHAR(50),
+    visited_property_id INT,
+    entry_time DATETIME NOT NULL,
+    exit_time DATETIME,
+    vehicle_plate VARCHAR(20),
+    vehicle_make VARCHAR(50),
+    logged_by INT NOT NULL,
+    notes TEXT,
+    status ENUM('active', 'exited') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (visited_property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (logged_by) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_entry_time (entry_time),
+    INDEX idx_exit_time (exit_time),
+    INDEX idx_status (status),
+    INDEX idx_visited_property_id (visited_property_id),
+    INDEX idx_logged_by (logged_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+>>>>>>> cff4d41746b25f0f76c5398b7bdcd4a52b2eb298
 -- ============================================
 -- Insert default roles
 -- ============================================

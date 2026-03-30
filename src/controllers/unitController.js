@@ -1,4 +1,4 @@
-const { Unit, Property } = require('../models');
+const { Unit, Property, User } = require('../models'); // Added User model
 
 // @desc    Get all units
 // @route   GET /api/units
@@ -19,6 +19,11 @@ exports.getAllUnits = async (req, res) => {
                     model: Property,
                     as: 'property',
                     attributes: ['id', 'name', 'location']
+                },
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
                 }
             ],
             order: [['property_id', 'ASC'], ['unit_number', 'ASC']]
@@ -49,6 +54,11 @@ exports.getUnitById = async (req, res) => {
                     model: Property,
                     as: 'property',
                     attributes: ['id', 'name', 'location', 'description']
+                },
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
                 }
             ]
         });
@@ -275,6 +285,13 @@ exports.getUnitsByProperty = async (req, res) => {
         
         const units = await Unit.findAll({
             where: { property_id: propertyId },
+            include: [
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+                }
+            ],
             order: [['unit_number', 'ASC']]
         });
         

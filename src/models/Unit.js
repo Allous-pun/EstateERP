@@ -84,12 +84,40 @@ const Unit = sequelize.define('Unit', {
     features: {
         type: DataTypes.TEXT,
         allowNull: true,
+        // FIXED: Safely get and set features
         get() {
             const rawValue = this.getDataValue('features');
-            return rawValue ? JSON.parse(rawValue) : [];
+            if (!rawValue) return [];
+            try {
+                // If it's already a string, try to parse it
+                if (typeof rawValue === 'string') {
+                    return JSON.parse(rawValue);
+                }
+                return rawValue;
+            } catch (e) {
+                // If parsing fails, return as is (could be comma-separated)
+                if (typeof rawValue === 'string' && rawValue.includes(',')) {
+                    return rawValue.split(',').map(item => item.trim());
+                }
+                return rawValue ? [rawValue] : [];
+            }
         },
         set(value) {
-            this.setDataValue('features', JSON.stringify(value));
+            // Always store as JSON string
+            if (Array.isArray(value)) {
+                this.setDataValue('features', JSON.stringify(value));
+            } else if (typeof value === 'string') {
+                // If it's a comma-separated string, convert to array
+                if (value.includes(',')) {
+                    this.setDataValue('features', JSON.stringify(value.split(',').map(item => item.trim())));
+                } else {
+                    this.setDataValue('features', JSON.stringify([value]));
+                }
+            } else if (value) {
+                this.setDataValue('features', JSON.stringify([value]));
+            } else {
+                this.setDataValue('features', JSON.stringify([]));
+            }
         }
     },
     is_active: {
