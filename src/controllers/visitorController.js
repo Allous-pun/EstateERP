@@ -106,44 +106,44 @@ class VisitorController {
     }
 
     // Check-out visitor
-static async checkout(req, res) {
-    try {
-        const { visitor_id } = req.params;
-        
-        // Use Sequelize to update the visitor
-        const visitor = await Visitor.findByPk(visitor_id);
-        
-        if (!visitor) {
-            return res.status(404).json({ error: 'Visitor not found' });
+    static async checkout(req, res) {
+        try {
+            const { visitor_id } = req.params;
+            
+            // Use Sequelize to update the visitor
+            const visitor = await Visitor.findByPk(visitor_id);
+            
+            if (!visitor) {
+                return res.status(404).json({ error: 'Visitor not found' });
+            }
+            
+            if (visitor.check_out_time) {
+                return res.status(400).json({ error: 'Visitor already checked out' });
+            }
+            
+            // Update check_out_time
+            await visitor.update({
+                check_out_time: new Date()
+            });
+            
+            // Update VisitorLog
+            await VisitorLog.update(
+                { 
+                    status: 'exited',
+                    exit_time: new Date()
+                },
+                { where: { visitor_name: visitor.full_name, status: 'active' } }
+            );
+            
+            res.json({
+                success: true,
+                message: 'Check-out successful'
+            });
+        } catch (error) {
+            console.error('Checkout error:', error);
+            res.status(500).json({ error: error.message });
         }
-        
-        if (visitor.check_out_time) {
-            return res.status(400).json({ error: 'Visitor already checked out' });
-        }
-        
-        // Update check_out_time
-        await visitor.update({
-            check_out_time: new Date()
-        });
-        
-        // Update VisitorLog
-        await VisitorLog.update(
-            { 
-                status: 'exited',
-                exit_time: new Date()
-            },
-            { where: { visitor_name: visitor.full_name, status: 'active' } }
-        );
-        
-        res.json({
-            success: true,
-            message: 'Check-out successful'
-        });
-    } catch (error) {
-        console.error('Checkout error:', error);
-        res.status(500).json({ error: error.message });
     }
-}
 
     // Regenerate QR code
     static async regenerateQR(req, res) {
@@ -243,7 +243,7 @@ static async checkout(req, res) {
     }
 
     // ============================================
-    // YOUR EXISTING ENTRY/EXIT LOGGING METHODS
+    // ENTRY/EXIT LOGGING METHODS (FIXED)
     // ============================================
 
     // @desc    Log visitor entry
@@ -263,7 +263,7 @@ static async checkout(req, res) {
                 vehicle_plate,
                 vehicle_make,
                 notes
-            } = req.body;
+            } = req.body || {};
 
             if (!visitor_name || !visitor_phone || !purpose) {
                 return res.status(400).json({
@@ -308,18 +308,20 @@ static async checkout(req, res) {
             console.error('Log entry error:', error);
             res.status(500).json({
                 success: false,
-                message: 'Failed to log visitor entry'
+                message: 'Failed to log visitor entry',
+                error: error.message
             });
         }
     }
 
-    // @desc    Log visitor exit
+    // @desc    Log visitor exit (FIXED - handles empty request body)
     // @route   PUT /api/visitors/:id/exit
     // @access  Private (Security Guard only)
     static async logExit(req, res) {
         try {
             const { id } = req.params;
-            const { notes } = req.body;
+            // FIXED: Safely get notes from request body (handle undefined)
+            const notes = req.body?.notes;
 
             const visitorLog = await VisitorLog.findByPk(id);
 
@@ -337,11 +339,18 @@ static async checkout(req, res) {
                 });
             }
 
-            await visitorLog.update({
+            // Update with current timestamp
+            const updateData = {
                 exit_time: new Date(),
-                status: 'exited',
-                notes: notes ? `${visitorLog.notes || ''}\nExit notes: ${notes}`.trim() : visitorLog.notes
-            });
+                status: 'exited'
+            };
+
+            // Only add notes if they exist
+            if (notes) {
+                updateData.notes = `${visitorLog.notes || ''}\nExit notes: ${notes}`.trim();
+            }
+
+            await visitorLog.update(updateData);
 
             res.json({
                 success: true,
@@ -352,7 +361,8 @@ static async checkout(req, res) {
             console.error('Log exit error:', error);
             res.status(500).json({
                 success: false,
-                message: 'Failed to log visitor exit'
+                message: 'Failed to log visitor exit',
+                error: error.message
             });
         }
     }
