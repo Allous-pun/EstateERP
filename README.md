@@ -67,8 +67,8 @@ NODE_ENV=development
 
 # Database Configuration
 DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password_here
+DB_USER=estate_user
+DB_PASSWORD=Estate@2026
 DB_NAME=EstateERP
 DB_PORT=3306
 
