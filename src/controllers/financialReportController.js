@@ -565,3 +565,118 @@ exports.exportFinancialReport = async (req, res) => {
         });
     }
 };
+
+// ============================================
+// NEW: Finance Dashboard Endpoints for FinanceDashboard.tsx
+// ============================================
+
+// @desc    Get finance dashboard statistics (for FinanceDashboard.tsx)
+// @route   GET /api/finance/dashboard/stats
+// @access  Private/Finance
+exports.getDashboardStats = async (req, res) => {
+    try {
+        const invoices = await Invoice.findAll();
+        
+        const totalRevenue = invoices.reduce((sum, inv) => sum + (parseFloat(inv.total_amount) || 0), 0);
+        const totalCollected = invoices.reduce((sum, inv) => sum + (parseFloat(inv.amount_paid) || 0), 0);
+        const totalOutstanding = invoices.reduce((sum, inv) => sum + (parseFloat(inv.balance_due) || 0), 0);
+        
+        const paidPercentage = totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0;
+        
+        res.json({
+            success: true,
+            data: {
+                total_revenue: totalRevenue,
+                total_outstanding: totalOutstanding,
+                total_collected: totalCollected,
+                paid_percentage: parseFloat(paidPercentage.toFixed(2))
+            }
+        });
+    } catch (error) {
+        console.error('Get dashboard stats error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Get revenue data for charts
+// @route   GET /api/finance/dashboard/revenue
+// @access  Private/Finance
+exports.getRevenueData = async (req, res) => {
+    try {
+        const { range = 'month' } = req.query;
+        const invoices = await Invoice.findAll();
+        
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const today = new Date();
+        let monthsToShow = 6;
+        
+        if (range === 'quarter') monthsToShow = 3;
+        if (range === 'year') monthsToShow = 12;
+        
+        const revenueData = [];
+        
+        for (let i = monthsToShow - 1; i >= 0; i--) {
+            const monthIndex = (today.getMonth() - i + 12) % 12;
+            const monthName = months[monthIndex];
+            
+            const monthInvoices = invoices.filter(inv => 
+                new Date(inv.invoice_date).getMonth() === monthIndex &&
+                new Date(inv.invoice_date).getFullYear() === today.getFullYear()
+            );
+            
+            const revenue = monthInvoices.reduce((sum, inv) => sum + (parseFloat(inv.total_amount) || 0), 0);
+            const collected = monthInvoices.reduce((sum, inv) => sum + (parseFloat(inv.amount_paid) || 0), 0);
+            
+            revenueData.push({ month: monthName, revenue, collected });
+        }
+        
+        res.json({
+            success: true,
+            data: revenueData
+        });
+    } catch (error) {
+        console.error('Get revenue data error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Get recent payments
+// @route   GET /api/finance/dashboard/payments
+// @access  Private/Finance
+exports.getRecentPayments = async (req, res) => {
+    try {
+        const payments = await Payment.findAll({
+            include: [
+                {
+                    model: Invoice,
+                    as: 'invoice',
+                    include: [
+                        {
+                            model: User,
+                            as: 'tenant',
+                            attributes: ['id', 'first_name', 'last_name', 'email']
+                        }
+                    ]
+                }
+            ],
+            order: [['payment_date', 'DESC']],
+            limit: 10
+        });
+        
+        const paymentHistory = payments.map(p => ({
+            id: p.id,
+            date: p.payment_date,
+            tenant: p.invoice?.tenant ? `${p.invoice.tenant.first_name} ${p.invoice.tenant.last_name}` : 'Unknown',
+            amount: parseFloat(p.amount),
+            status: 'paid'
+        }));
+        
+        res.json({
+            success: true,
+            data: paymentHistory
+        });
+    } catch (error) {
+        console.error('Get recent payments error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};

@@ -15,6 +15,7 @@ const blacklistRoutes = require('./routes/blacklistRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const financeRoutes = require('./routes/financeRoutes');
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use('/api/blacklist', blacklistRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/finance', financeRoutes);
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
