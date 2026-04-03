@@ -14,6 +14,7 @@ const blacklistRoutes = require('./routes/blacklistRoutes');
 // Phase 5: Maintenance Module Routes
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/blacklist', blacklistRoutes);
 // Phase 5: Maintenance Module Routes
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
