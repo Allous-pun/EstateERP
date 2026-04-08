@@ -1,3 +1,4 @@
+// src/controllers/userController.js
 const User = require('../models/User');
 const Role = require('../models/Role');
 
@@ -108,5 +109,43 @@ exports.deleteUser = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// ============================================
+// NEW: Get technicians (for Facility Manager)
+// ============================================
+
+// @desc    Get all technicians (users with role_id = 5)
+// @route   GET /api/users/technicians
+// @access  Private/Admin, Facility Manager
+exports.getTechnicians = async (req, res) => {
+    try {
+        const technicians = await User.findAll({
+            where: {
+                role_id: 5,
+                is_active: true
+            },
+            attributes: ['id', 'first_name', 'last_name', 'email', 'phone'],
+            include: [
+                {
+                    model: Role,
+                    as: 'role',
+                    attributes: ['name']
+                }
+            ],
+            order: [['first_name', 'ASC']]
+        });
+        
+        res.json({
+            success: true,
+            data: technicians
+        });
+    } catch (error) {
+        console.error('Get technicians error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
     }
 };

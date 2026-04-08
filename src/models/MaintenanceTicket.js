@@ -73,10 +73,25 @@ const MaintenanceTicket = sequelize.define('MaintenanceTicket', {
         allowNull: true,
         get() {
             const rawValue = this.getDataValue('materials_used');
-            return rawValue ? JSON.parse(rawValue) : [];
+            if (!rawValue) return [];
+            try {
+                // Handle empty string, null, undefined, or invalid JSON
+                if (rawValue === '' || rawValue === 'null' || rawValue === 'undefined') {
+                    return [];
+                }
+                const parsed = JSON.parse(rawValue);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error('Error parsing materials_used:', e.message);
+                return [];
+            }
         },
         set(value) {
-            this.setDataValue('materials_used', JSON.stringify(value));
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+                this.setDataValue('materials_used', null);
+            } else {
+                this.setDataValue('materials_used', JSON.stringify(value));
+            }
         }
     },
     notes: {
@@ -92,10 +107,24 @@ const MaintenanceTicket = sequelize.define('MaintenanceTicket', {
         allowNull: true,
         get() {
             const rawValue = this.getDataValue('before_photos');
-            return rawValue ? JSON.parse(rawValue) : [];
+            if (!rawValue) return [];
+            try {
+                if (rawValue === '' || rawValue === 'null' || rawValue === 'undefined') {
+                    return [];
+                }
+                const parsed = JSON.parse(rawValue);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error('Error parsing before_photos:', e.message);
+                return [];
+            }
         },
         set(value) {
-            this.setDataValue('before_photos', JSON.stringify(value));
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+                this.setDataValue('before_photos', null);
+            } else {
+                this.setDataValue('before_photos', JSON.stringify(value));
+            }
         }
     },
     after_photos: {
@@ -103,10 +132,24 @@ const MaintenanceTicket = sequelize.define('MaintenanceTicket', {
         allowNull: true,
         get() {
             const rawValue = this.getDataValue('after_photos');
-            return rawValue ? JSON.parse(rawValue) : [];
+            if (!rawValue) return [];
+            try {
+                if (rawValue === '' || rawValue === 'null' || rawValue === 'undefined') {
+                    return [];
+                }
+                const parsed = JSON.parse(rawValue);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error('Error parsing after_photos:', e.message);
+                return [];
+            }
         },
         set(value) {
-            this.setDataValue('after_photos', JSON.stringify(value));
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+                this.setDataValue('after_photos', null);
+            } else {
+                this.setDataValue('after_photos', JSON.stringify(value));
+            }
         }
     },
     is_billed: {

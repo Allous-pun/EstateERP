@@ -1,4 +1,6 @@
+// src/controllers/maintenanceController.js
 const { MaintenanceTicket, Unit, Property, User, StockLog, Inventory } = require('../models');
+const { sequelize } = require('../config/database');  // ADD THIS LINE
 const { Op } = require('sequelize');
 
 // Generate ticket number
@@ -313,9 +315,9 @@ exports.addMaterials = async (req, res) => {
 
 // @desc    Complete ticket and generate invoice
 // @route   POST /api/maintenance/tickets/:id/complete
-// @access  Private/Technician, Admin
+// @access  Private/Technician, Admin, Facility Manager
 exports.completeTicket = async (req, res) => {
-    const transaction = await sequelize.transaction();
+    const transaction = await sequelize.transaction();  // Now sequelize is defined
     
     try {
         const ticket = await MaintenanceTicket.findByPk(req.params.id, {
@@ -352,7 +354,7 @@ exports.completeTicket = async (req, res) => {
             
             const invoice = await Invoice.create({
                 invoice_number: invoiceNumber,
-                tenant_id: null, // Will be set from unit
+                tenant_id: null,
                 unit_id: ticket.unit_id,
                 property_id: ticket.property_id,
                 amount: ticket.actual_cost,

@@ -297,6 +297,16 @@ class InvoiceService {
                     model: Tenancy,
                     as: 'tenancy',
                     include: ['tenant']
+                },
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+                },
+                {
+                    model: Property,
+                    as: 'property',
+                    attributes: ['id', 'name', 'location']
                 }
             ]
         });
@@ -315,9 +325,30 @@ class InvoiceService {
         return await Invoice.findAll({
             where: { tenant_id: tenantId },
             include: [
-                { model: Unit, as: 'unit', include: ['property'] },
-                { model: Payment, as: 'payments' },
-                { model: Tenancy, as: 'tenancy' }
+                { 
+                    model: Unit, 
+                    as: 'unit', 
+                    include: ['property'] 
+                },
+                { 
+                    model: Payment, 
+                    as: 'payments' 
+                },
+                { 
+                    model: Tenancy, 
+                    as: 'tenancy',
+                    include: ['tenant']
+                },
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+                },
+                {
+                    model: Property,
+                    as: 'property',
+                    attributes: ['id', 'name', 'location']
+                }
             ],
             order: [['invoice_date', 'DESC']]
         });
@@ -354,7 +385,7 @@ class InvoiceService {
     }
 
     /**
-     * Get all invoices with filters
+     * Get all invoices with filters (UPDATED with proper tenant and property associations)
      */
     async getAllInvoices(filters = {}) {
         const where = {};
@@ -370,9 +401,44 @@ class InvoiceService {
         return await Invoice.findAll({
             where,
             include: [
-                { model: Unit, as: 'unit', include: ['property'] },
-                { model: Payment, as: 'payments' },
-                { model: Tenancy, as: 'tenancy', include: ['tenant'] }
+                { 
+                    model: Unit, 
+                    as: 'unit', 
+                    attributes: ['id', 'unit_number', 'building'],
+                    include: [
+                        {
+                            model: Property,
+                            as: 'property',
+                            attributes: ['id', 'name', 'location']
+                        }
+                    ]
+                },
+                { 
+                    model: Payment, 
+                    as: 'payments',
+                    attributes: ['id', 'amount', 'payment_method', 'payment_date', 'reference_number']
+                },
+                { 
+                    model: Tenancy, 
+                    as: 'tenancy',
+                    include: [
+                        {
+                            model: User,
+                            as: 'tenant',
+                            attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+                        }
+                    ]
+                },
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+                },
+                {
+                    model: Property,
+                    as: 'property',
+                    attributes: ['id', 'name', 'location']
+                }
             ],
             order: [['invoice_date', 'DESC']]
         });

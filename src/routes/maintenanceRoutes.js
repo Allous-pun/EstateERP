@@ -1,29 +1,43 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middleware/authMiddleware');
-const { isAdmin, isFacilityManager, isTechnician, isTenant } = require('../middleware/roleMiddleware');
+const { isAdmin, isFacilityManager, isTechnician, isTenant, hasRole } = require('../middleware/roleMiddleware');
 const maintenanceController = require('../controllers/maintenanceController');
 
 router.use(verifyToken);
 
-// Public routes (authenticated users)
-router.get('/tickets', maintenanceController.getAllTickets);
-router.get('/tickets/:id', maintenanceController.getTicketById);
-router.get('/unit/:unitId/tickets', maintenanceController.getUnitTickets);
-router.get('/dashboard/stats', isAdmin || isFacilityManager, maintenanceController.getDashboardStats);
+// ============================================
+// Routes accessible by multiple roles
+// ============================================
 
-// Technician specific
+// Get all tickets (Admin, Facility Manager)
+router.get('/tickets', hasRole(['super_admin', 'admin', 'facility_manager']), maintenanceController.getAllTickets);
+
+// Get ticket by ID (all authenticated users)
+router.get('/tickets/:id', maintenanceController.getTicketById);
+
+// Get tickets by unit (Tenant, Admin, Facility Manager)
+router.get('/unit/:unitId/tickets', hasRole(['super_admin', 'admin', 'facility_manager', 'tenant']), maintenanceController.getUnitTickets);
+
+// Get dashboard stats (Admin, Facility Manager)
+router.get('/dashboard/stats', hasRole(['super_admin', 'admin', 'facility_manager']), maintenanceController.getDashboardStats);
+
+// Technician specific - get their assigned tickets
 router.get('/technician/tickets', isTechnician, maintenanceController.getTechnicianTickets);
 
-// Create ticket (Tenant, Admin)
-router.post('/tickets', isTenant || isAdmin, maintenanceController.createTicket);
+// Create ticket (Tenant, Admin, Facility Manager)
+router.post('/tickets', hasRole(['super_admin', 'admin', 'facility_manager', 'tenant']), maintenanceController.createTicket);
 
-// Admin/Facility Manager only
-router.put('/tickets/:id/assign', isAdmin || isFacilityManager, maintenanceController.assignTicket);
-router.post('/tickets/:id/materials', isAdmin || isFacilityManager || isTechnician, maintenanceController.addMaterials);
+// Assign ticket to technician (Admin, Facility Manager) - FIXED
+router.put('/tickets/:id/assign', hasRole(['super_admin', 'admin', 'facility_manager']), maintenanceController.assignTicket);
 
-// Technician/Admin
-router.put('/tickets/:id/status', isTechnician || isAdmin, maintenanceController.updateStatus);
-router.post('/tickets/:id/complete', isTechnician || isAdmin, maintenanceController.completeTicket);
+// Add materials to ticket (Admin, Facility Manager, Technician)
+router.post('/tickets/:id/materials', hasRole(['super_admin', 'admin', 'facility_manager', 'technician']), maintenanceController.addMaterials);
+
+// Update ticket status (Technician, Admin, Facility Manager)
+router.put('/tickets/:id/status', hasRole(['super_admin', 'admin', 'facility_manager', 'technician']), maintenanceController.updateStatus);
+
+// Complete ticket (Technician, Admin, Facility Manager)
+router.post('/tickets/:id/complete', hasRole(['super_admin', 'admin', 'facility_manager', 'technician']), maintenanceController.completeTicket);
 
 module.exports = router;
